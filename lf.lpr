@@ -70,12 +70,13 @@ var
   console_height: integer = 24;
 
   search_string: string;
+  wild_char: string = '*.*';
 
   file_size: Real;
   //total_size: Real = 0.0;
 
   i: Integer;
-  pause: string = 'n';
+  pause: string = 'q'; //quick by default
 
   {$ifdef windows}
   Wow64DisableWow64FsRedirection: TWow64DisableWow64FsRedirection = nil;
@@ -163,6 +164,25 @@ begin
     end;
     {$endif}
 
+    // parse params
+    if (ParamCount = 1) and (ParamStr(1) = '?') then
+    begin
+      WriteLn(#13#10'Help');
+    end
+    else if ParamCount > 0 then
+    begin
+      if (ParamCount = 1) and (ParamStr(1) = '/p') then
+         pause := 'n' // page it
+      else
+        wild_char :=  ParamStr(1);
+
+      if (ParamCount > 1) and (ParamStr(2) = '/p') then
+      begin
+        wild_char :=  ParamStr(1);
+        pause := 'n'; // page it
+      end;
+    end;
+
     // devicons
     //https://stackoverflow.com/questions/8409026/search-a-string-array-in-delphi
     //https://stackoverflow.com/questions/3054517/delphi-search-files-and-directories-fastest-alghorithm
@@ -172,9 +192,9 @@ begin
     // search now
     //rs := FindFirst('c:\windows\*.*', faAnyFile, sr);
     {$ifdef windows}
-    rs := FindFirst(search_string + '\*.*', faAnyFile, sr);
+    rs := FindFirst(search_string + '\' + wild_char, faAnyFile, sr);
     {$else}
-    rs := FindFirst(search_string + '/*.*', faAnyFile, sr);
+    rs := FindFirst(search_string + '/' + wild_char, faAnyFile, sr);
     {$endif}
     if rs = 0 then
     try
